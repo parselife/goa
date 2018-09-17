@@ -1,0 +1,17 @@
+DisablePathCorrection = false
+EnablePathEscape = false
+FireMethodNotAllowed = true
+DisableBodyConsumptionOnUnmarshal = false
+TimeFormat = "Mon, 01 Jan 2006 15:04:05 GMT"
+Charset = "UTF-8"
+
+[Other]
+[Other.appInfo]
+    Name = "GOA"
+    Desc = "A simple job log app built with Golang."
+    Author = "Alex"
+[Other.sqlConf]
+    DriverName = "mysql"
+    DbUrl = "root:qwer1234@tcp(127.0.0.1:3306)/goa_dev?charset=utf8"
+    ShowSql = true
+    LogLevel = 0
