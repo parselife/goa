@@ -1,1 +1,1 @@
-window.alert("app.js loaded from \"/");
+console.log("app.js loaded from \"/");

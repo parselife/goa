@@ -2,8 +2,10 @@ package web
 
 import (
 	"github.com/kataras/iris"
-	"github.com/kataras/iris/_examples/mvc/login/services"
 	"github.com/kataras/iris/sessions"
+	"goa/goa/service"
+	"github.com/kataras/iris/mvc"
+	"goa/goa/model"
 )
 
 type UserController struct {
@@ -16,13 +18,18 @@ type UserController struct {
 
 	// Our UserService, it's an interface which
 	// is binded from the main application.
-	Service services.UserService
+	Service service.UserService
 
 	// Session, binded using dependency injection from the main.go.
 	Session *sessions.Session
 }
 
-const userIDKey = "UserID"
+const (
+	userIDKey = "UserID"
+	authenticated = "Authenticated"
+	isAdmin = "IsAdmin"
+)
+
 
 func (c *UserController) getCurrentUserID() int64 {
 	userID := c.Session.GetInt64Default(userIDKey, 0)
@@ -33,6 +40,48 @@ func (c *UserController) isLoggedIn() bool {
 	return c.getCurrentUserID() > 0
 }
 
+// testcode
+func (c *UserController) GetText() mvc.Response {
+	return mvc.Response{
+		ContentType: "application/json",
+		Text: "{'name':'alex'}",
+	}
+
+}
+
 func (c *UserController) logout() {
 	c.Session.Destroy()
+}
+
+func (c *UserController) PostLogin() mvc.Response {
+	var (
+		username = c.Ctx.FormValue("username")
+		password = c.Ctx.FormValue("password")
+	)
+
+	u, ok := c.Service.GetByUsername(username)
+
+	if !ok {
+
+		return mvc.Response{
+
+		}
+	}
+	// validate password
+	valid := model.Md5Password(password) == u.Password
+	if !valid {
+		return mvc.Response{
+			Text: "",
+		}
+	}
+
+	c.Session.Set(userIDKey, u.ID)
+	c.Session.Set(authenticated, true)
+	c.Session.Set(isAdmin, u.IsAdmin)
+
+	return mvc.Response{
+		Path: "/",
+	}
+
+
 }

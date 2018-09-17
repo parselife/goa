@@ -2,16 +2,15 @@ package main
 
 import (
 	"github.com/kataras/iris"
-	"log"
+	"github.com/kataras/iris/mvc"
+	"github.com/kataras/iris/sessions"
 	"goa/goa/core"
 	"goa/goa/datasource"
 	"goa/goa/repo"
 	"goa/goa/service"
-	"github.com/kataras/iris/mvc"
-	"github.com/kataras/iris/_examples/mvc/login/web/controllers"
-	"github.com/kataras/iris/sessions"
+	"goa/goa/web"
+	"log"
 	"time"
-	"goa/goa/middleware"
 )
 
 func main() {
@@ -36,24 +35,26 @@ func main() {
 	userRepo := repo.NewUserRepo(db)
 	userService := service.NewUserService(userRepo)
 
-	// "/user" based mvc application.
 	sessionManager := sessions.New(sessions.Config{
-		Cookie:  "sessioncookiename",
-		Expires: 12 * time.Hour,
+		Cookie:       "sessioncookiename",
+		Expires:      12 * time.Hour,
+		AllowReclaim: true,
 	})
 
 	user := mvc.New(app.Party("/user"))
-	// Add the basic authentication(admin:password) middleware
-	// for the /user based requests.
-	user.Router.Use(middleware.BasicAuth)
 
 	user.Register(
 		userService,
 		sessionManager.Start,
 	)
-	user.Handle(new(controllers.UserController))
+	user.Handle(new(web.UserController))
 
 	//app.Get("/", func(ctx iris.Context) {
+	//	// Check if user is authenticated
+	//	if auth, _ := sessionManager.Start(ctx).GetBoolean("authenticated"); !auth {
+	//		ctx.StatusCode(iris.StatusForbidden)
+	//		return
+	//	}
 	//	ctx.View("index.html")
 	//})
 	//
@@ -61,18 +62,35 @@ func main() {
 	//	ctx.JSON(appConf.AppInfo)
 	//})
 
+	//app.Get("/login", func(ctx iris.Context) {
+	//	session := sessionManager.Start(ctx)
+	//
+	//	// Authentication goes here
+	//	// ... todo
+	//
+	//	// Set user as authenticated
+	//	session.Set("authenticated", true)
+	//
+	//})
+
+	//app.Get("/logout", func(ctx iris.Context) {
+	//	session := sessionManager.Start(ctx)
+	//
+	//	session.Set("authenticated", false)
+	//})
+
 	app.Run(iris.Addr(":9090"), iris.WithConfiguration(c))
 }
 
-// 初始化一个 spa
+// 初始化app
 func spa() *iris.Application {
 	app := iris.New()
 	// 设置日志级别
 	app.Logger().SetLevel("info")
 	// 注册视图
 	app.RegisterView(iris.HTML("./public", ".html").Reload(true))
-	assetHandler := app.StaticHandler("./public", false, false)
-	app.SPA(assetHandler)
+	//assetHandler := app.StaticHandler("./public", false, false)
+	//app.SPA(assetHandler)
 	return app
 }
 

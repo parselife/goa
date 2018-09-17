@@ -9,8 +9,9 @@ import (
 // 系统登录用户
 type User struct {
 	ID          int64     `json:"id"`
+	OrganId     int64     `json:"organ"`
 	Name        string    `json:"name" xorm:" notnull unique 'name'"`
-	Password    [16]byte    `json:"-"`
+	Password    [16]byte  `json:"-"`
 	DisplayName string    `json:"display_name"`
 	Enabled     bool      `json:"enabled"`
 	IsAdmin     bool      `json:"is_admin"`
