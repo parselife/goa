@@ -21,3 +21,18 @@ type UserController struct {
 	// Session, binded using dependency injection from the main.go.
 	Session *sessions.Session
 }
+
+const userIDKey = "UserID"
+
+func (c *UserController) getCurrentUserID() int64 {
+	userID := c.Session.GetInt64Default(userIDKey, 0)
+	return userID
+}
+
+func (c *UserController) isLoggedIn() bool {
+	return c.getCurrentUserID() > 0
+}
+
+func (c *UserController) logout() {
+	c.Session.Destroy()
+}

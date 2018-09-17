@@ -7,45 +7,73 @@ import (
 	"goa/goa/datasource"
 	"goa/goa/repo"
 	"goa/goa/service"
+	"github.com/kataras/iris/mvc"
+	"github.com/kataras/iris/_examples/mvc/login/web/controllers"
+	"github.com/kataras/iris/sessions"
+	"time"
+	"goa/goa/middleware"
 )
 
 func main() {
-	app := iris.New()
-	app.Logger().SetLevel("info")
-	app.RegisterView(iris.HTML("./public", ".html"))
 
-	assetHandler := app.StaticHandler("./public", false, false)
-	app.SPA(assetHandler)
+	app := spa()
 
 	c := iris.TOML("./etc/app.tml")
-
 	appConf := parseConfig(c.Other)
 
+	// 初始化 orm 连接
 	db, err := datasource.Init(&appConf.SqlConf)
-	if err !=nil {
-		log.Fatal("db init error")
+	if err != nil {
+		app.Logger().Fatalf("db init error: %v", err)
+		return
 	}
-
 	iris.RegisterOnInterrupt(func() {
 		db.Close()
 	})
 
+	// ---- web 业务部分 ----
+
 	userRepo := repo.NewUserRepo(db)
 	userService := service.NewUserService(userRepo)
 
-
-
-	app.Get("/index", func(ctx iris.Context) {
-		//ctx.ViewData("App", appConfig)
-		ctx.View("index.html")
+	// "/user" based mvc application.
+	sessionManager := sessions.New(sessions.Config{
+		Cookie:  "sessioncookiename",
+		Expires: 12 * time.Hour,
 	})
 
-	app.Get("/", func(ctx iris.Context) {
-		ctx.JSON(appConf)
-	})
+	user := mvc.New(app.Party("/user"))
+	// Add the basic authentication(admin:password) middleware
+	// for the /user based requests.
+	user.Router.Use(middleware.BasicAuth)
 
-	// Good when you have two configurations, one for development and a different one for production use.
+	user.Register(
+		userService,
+		sessionManager.Start,
+	)
+	user.Handle(new(controllers.UserController))
+
+	//app.Get("/", func(ctx iris.Context) {
+	//	ctx.View("index.html")
+	//})
+	//
+	//app.Get("/info", func(ctx iris.Context) {
+	//	ctx.JSON(appConf.AppInfo)
+	//})
+
 	app.Run(iris.Addr(":9090"), iris.WithConfiguration(c))
+}
+
+// 初始化一个 spa
+func spa() *iris.Application {
+	app := iris.New()
+	// 设置日志级别
+	app.Logger().SetLevel("info")
+	// 注册视图
+	app.RegisterView(iris.HTML("./public", ".html").Reload(true))
+	assetHandler := app.StaticHandler("./public", false, false)
+	app.SPA(assetHandler)
+	return app
 }
 
 // 解析应用配置
