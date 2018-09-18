@@ -6,6 +6,7 @@ import (
 	"github.com/kataras/iris/sessions"
 	"goa/goa/core"
 	"goa/goa/service"
+	"goa/goa/model"
 )
 
 type UserController struct {
@@ -31,6 +32,35 @@ func (c *UserController) getCurrentUserID() int64 {
 
 func (c *UserController) isLoggedIn() bool {
 	return c.getCurrentUserID() > 0
+}
+
+// 登录
+func (c *UserController) PostLogin() mvc.Result {
+	var (
+		username = c.Ctx.FormValue("username")
+		password = c.Ctx.FormValue("password")
+	)
+	u, ok := c.Service.GetByUsername(username)
+	if !ok {
+		return mvc.Response{
+
+		}
+	}
+	// 验证密码
+	valid := model.Md5Password(password) == u.Password
+	if !valid {
+		return mvc.Response{
+			Text: "",
+		}
+	}
+
+	c.Session.Set(core.UserId, u.ID)
+	c.Session.Set(core.AUTHENTICATED, true)
+	c.Session.Set(core.IsAdmin, u.IsAdmin)
+
+	return mvc.Response{
+		Path: "/",
+	}
 }
 
 // testcode

@@ -5,14 +5,15 @@ import (
 	"goa/goa/service"
 	"github.com/kataras/iris/sessions"
 	"github.com/kataras/iris/mvc"
-	"goa/goa/model"
 	"goa/goa/core"
 )
 
 // 默认 controller
 type IndexController struct {
+
 	Ctx iris.Context
 
+	// 注入
 	UserService service.UserService
 
 	// 由 main 注入
@@ -24,9 +25,6 @@ func (c *IndexController) GetLogout() {
 	c.Session.Destroy()
 }
 
-func (c *IndexController) GetText() string {
-	return "hello alex"
-}
 // 首页
 func (c *IndexController) Get() mvc.View {
 	return mvc.View{
@@ -45,34 +43,7 @@ func (c *IndexController) GetLogin()mvc.Response {
 
 }
 
-// 登录
-func (c *IndexController) PostLogin() mvc.Result {
-	var (
-		username = c.Ctx.FormValue("username")
-		password = c.Ctx.FormValue("password")
-	)
-	u, ok := c.UserService.GetByUsername(username)
-	if !ok {
-		return mvc.Response{
 
-		}
-	}
-	// 验证密码
-	valid := model.Md5Password(password) == u.Password
-	if !valid {
-		return mvc.Response{
-			Text: "",
-		}
-	}
-
-	c.Session.Set(core.UserId, u.ID)
-	c.Session.Set(core.AUTHENTICATED, true)
-	c.Session.Set(core.IsAdmin, u.IsAdmin)
-
-	return mvc.Response{
-		Path: "/",
-	}
-}
 
 
 //func (c *IndexController) BeforeActivation(b mvc.BeforeActivation) {

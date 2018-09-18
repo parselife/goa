@@ -37,53 +37,43 @@ func main() {
 		AllowReclaim: true,
 	})
 
+	//app.Use(securityMiddleware)
+
 	// ---- 依赖注入 ----
 	userService := service.NewUserService(repo.NewUserRepo(db))
-
-	portal := mvc.New(app.Party("/"))
-
-	portal.Router.Use(securityMiddleware)
-
-	portal.Register(
-		userService,
-		sessionManager.Start,
-	).Handle(new(web.IndexController))
-
-	portal.Party("/user").Register(
+	user := mvc.New(app.Party("/user"))
+	user.Register(
 		userService,
 		sessionManager.Start,
 	).Handle(new(web.UserController))
 
-	//app.Get("/", func(ctx iris.Context) {
-	//	// Check if user is authenticated
-	//	if auth, _ := sessionManager.Start(ctx).GetBoolean("authenticated"); !auth {
-	//		ctx.StatusCode(iris.StatusForbidden)
-	//		return
-	//	}
-	//	ctx.View("index.html")
-	//})
-	//
-	//app.Get("/info", func(ctx iris.Context) {
-	//	ctx.JSON(appConf.AppInfo)
-	//})
+	// 首页
+	app.Get("/", func(ctx iris.Context) {
+		// 检测是否登录
+		if auth, _ := sessionManager.Start(ctx).GetBoolean("authenticated"); !auth {
+			ctx.Redirect("/login")
+			return
+		}
+		ctx.ViewData("Title", "首页")
+		ctx.View("index.html")
+	})
+	//登录页
+	app.Get("/login", func(ctx iris.Context) {
+		ctx.View("login.html")
+	})
+	// 应用描述信息
+	app.Get("/info", func(ctx iris.Context) {
+		ctx.JSON(appConf.AppInfo)
+	})
 
-	//app.Get("/login", func(ctx iris.Context) {
-	//	session := sessionManager.Start(ctx)
-	//
-	//	// Authentication goes here
-	//	// ... todo
-	//
-	//	// Set user as authenticated
-	//	session.Set("authenticated", true)
-	//
-	//})
-
-	app.Run(iris.Addr(":9090"), iris.WithConfiguration(c))
+	app.Run(iris.Addr(":8080"), iris.WithConfiguration(c))
 }
 
+// todo
 func securityMiddleware(ctx iris.Context) {
 
 	fmt.Println(ctx.Path())
+	fmt.Println(ctx.RequestPath(true))
 	ctx.Next()
 }
 
@@ -95,8 +85,8 @@ func newApp() *iris.Application {
 	app.Logger().SetLevel("info")
 	// 注册视图
 	app.RegisterView(iris.HTML("./public", ".html").Reload(true))
-	//assetHandler := app.StaticHandler("./public", false, false)
-	//app.SPA(assetHandler)
+	assetHandler := app.StaticHandler("./public", false, false)
+	app.SPA(assetHandler)
 	app.Logger().Info("app is ready")
 	return app
 }
