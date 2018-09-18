@@ -13,5 +13,5 @@ Charset = "UTF-8"
 [Other.sqlConf]
     DriverName = "mysql"
     DbUrl = "root:qwer1234@tcp(127.0.0.1:3306)/goa_dev?charset=utf8"
-    ShowSql = true
+    ShowSql = false
     LogLevel = 0

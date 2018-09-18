@@ -1,8 +1,8 @@
 package model
 
-// 部门
+// 员工部门
 type Organ struct {
 	ID          int64
-	Name        string `json:"name" xorm:"notnull, unique"`
-	Description string `json:"desc,omitempty" xorm:"varchar(255)"`
+	Name        string `json:"name" xorm:"varchar(50) notnull unique"`
+	Description string `json:"desc,omitempty"`
 }

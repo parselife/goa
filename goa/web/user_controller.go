@@ -2,10 +2,10 @@ package web
 
 import (
 	"github.com/kataras/iris"
-	"github.com/kataras/iris/sessions"
-	"goa/goa/service"
 	"github.com/kataras/iris/mvc"
-	"goa/goa/model"
+	"github.com/kataras/iris/sessions"
+	"goa/goa/core"
+	"goa/goa/service"
 )
 
 type UserController struct {
@@ -24,15 +24,8 @@ type UserController struct {
 	Session *sessions.Session
 }
 
-const (
-	userIDKey = "UserID"
-	authenticated = "Authenticated"
-	isAdmin = "IsAdmin"
-)
-
-
 func (c *UserController) getCurrentUserID() int64 {
-	userID := c.Session.GetInt64Default(userIDKey, 0)
+	userID := c.Session.GetInt64Default(core.UserId, 0)
 	return userID
 }
 
@@ -42,46 +35,15 @@ func (c *UserController) isLoggedIn() bool {
 
 // testcode
 func (c *UserController) GetText() mvc.Response {
+	if ok, _ := c.Session.GetBoolean(core.AUTHENTICATED); !ok {
+		return mvc.Response{
+			Code: iris.StatusUnauthorized,
+			Text: "login first",
+		}
+	}
 	return mvc.Response{
 		ContentType: "application/json",
-		Text: "{'name':'alex'}",
+		Text:        "{'name':'alex'}",
 	}
-
-}
-
-func (c *UserController) logout() {
-	c.Session.Destroy()
-}
-
-func (c *UserController) PostLogin() mvc.Response {
-	var (
-		username = c.Ctx.FormValue("username")
-		password = c.Ctx.FormValue("password")
-	)
-
-	u, ok := c.Service.GetByUsername(username)
-
-	if !ok {
-
-		return mvc.Response{
-
-		}
-	}
-	// validate password
-	valid := model.Md5Password(password) == u.Password
-	if !valid {
-		return mvc.Response{
-			Text: "",
-		}
-	}
-
-	c.Session.Set(userIDKey, u.ID)
-	c.Session.Set(authenticated, true)
-	c.Session.Set(isAdmin, u.IsAdmin)
-
-	return mvc.Response{
-		Path: "/",
-	}
-
 
 }

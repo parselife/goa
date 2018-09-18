@@ -11,16 +11,16 @@ import (
 	"goa/goa/web"
 	"log"
 	"time"
+	"fmt"
 )
 
 func main() {
 
-	app := spa()
-
+	app := newApp()
+	// 解析配置
 	c := iris.TOML("./etc/app.tml")
 	appConf := parseConfig(c.Other)
-
-	// 初始化 orm 连接
+	// 初始化数据库连接
 	db, err := datasource.Init(&appConf.SqlConf)
 	if err != nil {
 		app.Logger().Fatalf("db init error: %v", err)
@@ -30,24 +30,29 @@ func main() {
 		db.Close()
 	})
 
-	// ---- web 业务部分 ----
-
-	userRepo := repo.NewUserRepo(db)
-	userService := service.NewUserService(userRepo)
-
+	// ---- 初始化 session ----
 	sessionManager := sessions.New(sessions.Config{
-		Cookie:       "sessioncookiename",
+		Cookie:       "njzykjgoa",
 		Expires:      12 * time.Hour,
 		AllowReclaim: true,
 	})
 
-	user := mvc.New(app.Party("/user"))
+	// ---- 依赖注入 ----
+	userService := service.NewUserService(repo.NewUserRepo(db))
 
-	user.Register(
+	portal := mvc.New(app.Party("/"))
+
+	portal.Router.Use(securityMiddleware)
+
+	portal.Register(
 		userService,
 		sessionManager.Start,
-	)
-	user.Handle(new(web.UserController))
+	).Handle(new(web.IndexController))
+
+	portal.Party("/user").Register(
+		userService,
+		sessionManager.Start,
+	).Handle(new(web.UserController))
 
 	//app.Get("/", func(ctx iris.Context) {
 	//	// Check if user is authenticated
@@ -73,24 +78,26 @@ func main() {
 	//
 	//})
 
-	//app.Get("/logout", func(ctx iris.Context) {
-	//	session := sessionManager.Start(ctx)
-	//
-	//	session.Set("authenticated", false)
-	//})
-
 	app.Run(iris.Addr(":9090"), iris.WithConfiguration(c))
 }
 
+func securityMiddleware(ctx iris.Context) {
+
+	fmt.Println(ctx.Path())
+	ctx.Next()
+}
+
 // 初始化app
-func spa() *iris.Application {
+func newApp() *iris.Application {
 	app := iris.New()
-	// 设置日志级别
+	// 设置日志
+	app.Logger().Prefix = []byte("[goa]")
 	app.Logger().SetLevel("info")
 	// 注册视图
 	app.RegisterView(iris.HTML("./public", ".html").Reload(true))
 	//assetHandler := app.StaticHandler("./public", false, false)
 	//app.SPA(assetHandler)
+	app.Logger().Info("app is ready")
 	return app
 }
 
