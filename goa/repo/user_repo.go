@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"errors"
 	"fmt"
 	"github.com/go-xorm/xorm"
 	"goa/goa/model"
@@ -14,6 +13,8 @@ type UserRepository interface {
 	//FindPage() (users []model.User)
 	Save(user model.User) (updatedUser model.User, err error)
 	DeleteOne(id int64) (ok bool)
+
+	FindByOrgan(id int64) ([]model.User, error)
 }
 
 func NewUserRepo(engine *xorm.Engine) UserRepository {
@@ -58,23 +59,21 @@ func (r *userRepo) FindAll() (arr []model.User) {
 func (r *userRepo) Save(user model.User) (updatedUser model.User, err error) {
 	if user.ID > 0 {
 		// update
-		_, err = r.engine.Where("id = ?", user.ID).Update(&user)
-		if err != nil {
-			return
-		}
-		return user, nil
-	} else {
-		//	insert
-		id, err := r.engine.Insert(&user)
+		_, err = r.engine.Where("i_d = ?", user.ID).UseBool().Update(&user)
 		if err != nil {
 			fmt.Println(err)
 			return user, err
 		}
-		u, ok := r.FindOne(id)
-		if ok {
-			return u, nil
+		return user, nil
+	} else {
+		//	insert
+		user.Password = model.Md5Password(user.Password)
+		_, err := r.engine.Insert(&user)
+		if err != nil {
+			fmt.Println(err)
+			return user, err
 		}
-		return user, errors.New("save error")
+		return user, nil
 	}
 }
 
@@ -85,4 +84,14 @@ func (r *userRepo) DeleteOne(id int64) (ok bool) {
 		return false
 	}
 	return true
+}
+
+func (r *userRepo) FindByOrgan(id int64) ([]model.User, error) {
+	users := make([]model.User, 0)
+	err := r.engine.Where("organ_id = ?", id).Find(&users)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return users, nil
 }

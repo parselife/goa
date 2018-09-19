@@ -25,28 +25,30 @@
             <div class="right-arm"></div>
         </div>
 
-        <form class="login-form" action="/user/login" method="post">
+        <form class="login-form" id="loginForm" method="post">
             <div class="username">
-                <input type="text" name="username" placeholder="用户名">
+                <input type="text" name="username" placeholder="用户名" onchange="change()">
             </div>
             <div class="password">
-                <input type="password" name="password" placeholder="密码">
+                <input type="password" name="password" placeholder="密码" onchange="change()">
                 <div class="pwd-eye" style="background-image: url('img/password-show.png');" data-flag="hide"></div>
             </div>
             <div class="submit">
-                <button class="submit-btn">
+                <button class="submit-btn" type="button" onclick="login()">
                     登&nbsp;录
                 </button>
             </div>
         </form>
     </div>
-    <footer style="color: #ccc;font-size: .8em;">南京众越科技版权所有 &copy;2018</footer>
+    <div class="login-error"></div>
+    <footer style="color: #ccc;font-size: .8em; margin-top: 8rem;">众越科技版权所有 &copy;2018</footer>
 </div>
 <script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
 
         changeBg();
+
         $(".pwd-eye").hide();
         $(".pwd-eye").click(function () {
             var flag = $(this).attr('data-flag');
@@ -121,6 +123,53 @@
             }
         });
     });
+
+    function change() {
+        $('.login-error').text('').hide();
+    }
+
+    /**
+     * ajax 登录
+     * @returns {boolean}
+     */
+    function login() {
+        var username = $('input[name="username"]').val();
+        var password = $('input[name="password"]').val();
+        if (username === '') {
+            $('.login-error').text('*用户名为空!').show();
+            $('input[name="username"]').focus();
+            return false;
+        }
+        if (password == '') {
+            $('.login-error').text('*密码为空!').show();
+            $('input[name="password"]').focus();
+            return false;
+        }
+        var formdata = $('#loginForm').serialize();
+        if (location.search !== '') {
+            formdata = formdata.concat("&" + location.search.substring(1))
+        }
+
+        $.ajax({
+            type: "POST",
+            dataType: 'json',
+            url: "/signin",
+            data: formdata,
+            success: function (ret) {
+                debugger
+                if (ret.success == false) {
+                    console.warn(ret);
+                    $('.login-error').text(ret.msg).show();
+                } else {
+                    location.href = ret.hasOwnProperty('url') ? 'http://'+ret.url : '/';
+                }
+            },
+            error: function (e) {
+                console.error(e);
+            }
+        });
+    }
+
 
     function changeBg() {
         var idx = random(1, 4)

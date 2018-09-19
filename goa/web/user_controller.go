@@ -6,7 +6,6 @@ import (
 	"github.com/kataras/iris/sessions"
 	"goa/goa/core"
 	"goa/goa/service"
-	"goa/goa/model"
 )
 
 type UserController struct {
@@ -25,43 +24,27 @@ type UserController struct {
 	Session *sessions.Session
 }
 
-func (c *UserController) getCurrentUserID() int64 {
-	userID := c.Session.GetInt64Default(core.UserId, 0)
-	return userID
+func (c *UserController) authCheck() {
+	if !core.IsLoggedIn(c.Session) {
+		c.Ctx.Redirect("/login?url=" + c.Ctx.Request().Host + c.Ctx.Request().RequestURI)
+	}
 }
 
-func (c *UserController) isLoggedIn() bool {
-	return c.getCurrentUserID() > 0
-}
-
-// 登录
-func (c *UserController) PostLogin() mvc.Result {
-	var (
-		username = c.Ctx.FormValue("username")
-		password = c.Ctx.FormValue("password")
-	)
-	u, ok := c.Service.GetByUsername(username)
-	if !ok {
-		return mvc.Response{
-
+// 获取当前用户信息
+// Resource: http://localhost:8080/user/me
+func (c *UserController) GetMe() interface{} {
+	c.authCheck()
+	user, found := c.Service.GetByID(core.GetCurrentUserID(c.Session))
+	if !found {
+		return iris.Map{
+			"succcess": false,
+			"msg":      "用户不存在",
 		}
 	}
-	// 验证密码
-	valid := model.Md5Password(password) == u.Password
-	if !valid {
-		return mvc.Response{
-			Text: "",
-		}
-	}
-
-	c.Session.Set(core.UserId, u.ID)
-	c.Session.Set(core.AUTHENTICATED, true)
-	c.Session.Set(core.IsAdmin, u.IsAdmin)
-
-	return mvc.Response{
-		Path: "/",
-	}
+	return user
 }
+
+
 
 // testcode
 func (c *UserController) GetText() mvc.Response {

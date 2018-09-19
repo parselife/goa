@@ -16,6 +16,6 @@ type JobProject struct {
 	Name        string        `json:"name" xorm:"varchar(50) notnull unique"`
 	Status      ProjectStatus `json:"status"`
 	Description string        `json:"desc,omitempty"`
-	CreateAt    time.Time     `json:"create_at" xorm:"created"`
-	UpdateAt    time.Time     `json:"update_at" xorm:"updated"`
+	CreateAt    time.Time     `json:"createAt" xorm:"created"`
+	UpdateAt    time.Time     `json:"updateAt" xorm:"updated"`
 }

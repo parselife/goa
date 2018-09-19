@@ -9,6 +9,7 @@ import (
 type UserService interface {
 	GetAll() []model.User
 	GetByID(id int64) (model.User, bool)
+	GetByOrgan(organ int64) ([]model.User, bool)
 	GetByUsername(username string) (model.User, bool)
 	DeleteByID(id int64) bool
 
@@ -32,6 +33,14 @@ func (s *userService) GetAll() []model.User {
 // 获取单个用户
 func (s *userService) GetByID(id int64) (model.User, bool) {
 	return s.repo.FindOne(id)
+}
+
+func (s *userService) GetByOrgan(organ int64) ([]model.User, bool) {
+	users, err := s.repo.FindByOrgan(organ)
+	if err != nil {
+		return nil, false
+	}
+	return users, true
 }
 
 func (s *userService) GetByUsername(username string) (model.User, bool) {

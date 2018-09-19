@@ -12,6 +12,9 @@ import (
 	"log"
 	"time"
 	"fmt"
+	"goa/goa/model"
+	"flag"
+	"strconv"
 )
 
 func main() {
@@ -41,32 +44,90 @@ func main() {
 
 	// ---- 依赖注入 ----
 	userService := service.NewUserService(repo.NewUserRepo(db))
+	jobLogService := service.NewJobLogService(repo.NewJobLogRepo(db))
+	proService := service.NewProService(repo.NewProjectRepo(db))
+	organService := service.NewOrganService(repo.NewOrganRepo(db))
+	typeService := service.NewJobTypeService(repo.NewJobTypeRepo(db))
+
 	user := mvc.New(app.Party("/user"))
 	user.Register(
 		userService,
 		sessionManager.Start,
 	).Handle(new(web.UserController))
 
+	admin := mvc.New(app.Party("/rest"))
+	admin.Register(
+		userService,
+		jobLogService,
+		proService,
+		organService,
+		typeService,
+		sessionManager.Start,
+	).Handle(new(web.RestController))
+
 	// 首页
 	app.Get("/", func(ctx iris.Context) {
-		// 检测是否登录
-		if auth, _ := sessionManager.Start(ctx).GetBoolean("authenticated"); !auth {
+		if !core.IsLoggedIn(sessionManager.Start(ctx)) {
 			ctx.Redirect("/login")
 			return
 		}
 		ctx.ViewData("Title", "首页")
 		ctx.View("index.html")
 	})
+
 	//登录页
 	app.Get("/login", func(ctx iris.Context) {
+		if core.IsLoggedIn(sessionManager.Start(ctx)) {
+			ctx.Redirect("/")
+			return
+		}
 		ctx.View("login.html")
 	})
+
+	app.Post("/signin", func(ctx iris.Context) {
+		s := sessionManager.Start(ctx)
+		var (
+			username    = ctx.FormValue("username")
+			password    = ctx.FormValue("password")
+			redirectUrl = ctx.FormValue("url")
+		)
+		u, ok := userService.GetByUsername(username)
+		if !ok {
+			ctx.JSON(iris.Map{"success": false, "msg": "用户不存在"})
+			return
+		}
+		// 验证密码
+		valid := model.Md5Password(password) == u.Password
+		if !valid {
+			ctx.JSON(iris.Map{"success": false, "msg": "密码不正确"})
+			return
+		}
+		s.Set(core.UserId, u.ID)
+		s.Set(core.AUTHENTICATED, true)
+		s.Set(core.IsAdmin, u.IsAdmin)
+		if redirectUrl != "" {
+			ctx.JSON(iris.Map{"success": true, "url": redirectUrl})
+			return
+		}
+		ctx.JSON(iris.Map{"success": true})
+	})
+
+	//登出
+	app.Get("/logout", func(ctx iris.Context) {
+		session := sessionManager.Start(ctx)
+		session.Set(core.AUTHENTICATED, false)
+		session.Destroy()
+		ctx.Redirect("/login")
+	})
+
 	// 应用描述信息
 	app.Get("/info", func(ctx iris.Context) {
 		ctx.JSON(appConf.AppInfo)
 	})
 
-	app.Run(iris.Addr(":8080"), iris.WithConfiguration(c))
+	port := flag.Int("p", 8080, "http listen port")
+	flag.Parse()
+	app.Run(iris.Addr(":"+strconv.Itoa(*port)), iris.WithConfiguration(c))
 }
 
 // todo
@@ -85,8 +146,9 @@ func newApp() *iris.Application {
 	app.Logger().SetLevel("info")
 	// 注册视图
 	app.RegisterView(iris.HTML("./public", ".html").Reload(true))
-	assetHandler := app.StaticHandler("./public", false, false)
-	app.SPA(assetHandler)
+	app.StaticWeb("/", "./public")
+	//assetHandler := app.StaticHandler("./public", false, false)
+	//app.SPA(assetHandler)
 	app.Logger().Info("app is ready")
 	return app
 }

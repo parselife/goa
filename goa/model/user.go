@@ -4,29 +4,32 @@ import (
 	"crypto/md5"
 	"errors"
 	"time"
+	"fmt"
 )
 
 // 系统登录用户
 type User struct {
 	ID          int64     `json:"id"`
-	OrganId     int64     `json:"organ"`
+	OrganId     int64     `json:"organ, omitempty"`
 	Name        string    `json:"name" xorm:" notnull unique 'name'"`
-	Password    [16]byte  `json:"-"`
-	DisplayName string    `json:"display_name"`
-	Enabled     bool      `json:"enabled"`
-	IsAdmin     bool      `json:"is_admin"`
-	CreateAt    time.Time `json:"create_at" xorm:"created"`
-	UpdateAt    time.Time `json:"update_at" xorm:"updated"`
+	Password    string    `json:"password"`
+	DisplayName string    `json:"displayName"`
+	Enabled     bool      `json:"enabled" xorm:"default 1"`
+	IsAdmin     bool      `json:"isAdmin" xorm:"default 0"`
+	CreateAt    time.Time `json:"createAt" xorm:"created"`
+	UpdateAt    time.Time `json:"updateAt" xorm:"updated"`
 }
 
 // md5 加密
-func Md5Password(userPassword string) [16]byte {
-	return md5.Sum([]byte(userPassword))
+func Md5Password(userPassword string) string {
+	hash := md5.Sum([]byte(userPassword))
+	// 将[]byte转成16进制
+	return fmt.Sprintf("%x", hash)
 }
 
 // 验证密码是否正确
-func ValidatePassword(userPassword string, hashed [16]byte) (bool, error) {
-	if md5.Sum([]byte(userPassword)) == hashed {
+func ValidatePassword(userPassword string, hashed string) (bool, error) {
+	if Md5Password(userPassword) == hashed {
 		return true, nil
 	}
 	return false, errors.New("密码不正确")
