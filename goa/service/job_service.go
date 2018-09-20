@@ -14,10 +14,13 @@ type JobLogService interface {
 	DeleteByID(id int64) bool
 	Save(jobLog model.JobLog) (model.JobLog, error)
 
-	GetWeekly() []model.JobLog
-	GetMonthly() []model.JobLog
-	GetDaily() []model.JobLog
-	GetThreeDays() []model.JobLog
+	GetWeekly(startTime time.Time, endTime time.Time) []model.JobLog
+	GetMonthly(month time.Month) []model.JobLog
+	GetDaily(t time.Time) []model.JobLog
+	GetThreeDays(startTime time.Time, endTime time.Time) []model.JobLog
+
+	GetPreviousDay(t time.Time) []model.JobLog
+	GetNextDay(t time.Time) []model.JobLog
 }
 
 type jobLogService struct {
@@ -51,26 +54,35 @@ func (s *jobLogService) Save(jobLog model.JobLog) (model.JobLog, error) {
 }
 
 // 获取当前一周的工作日志
-func (s *jobLogService) GetWeekly() []model.JobLog {
-	now := time.Now()
-	now.Day()
+func (s *jobLogService) GetWeekly(startTime time.Time, endTime time.Time) []model.JobLog {
 
 	return nil
-
 }
 
 // 获取当月的工作日志
-func (s *jobLogService) GetMonthly() []model.JobLog {
+func (s *jobLogService) GetMonthly(month time.Month) []model.JobLog {
 
 	return nil
 }
 
 // 获取当天的工作日志
-func (s *jobLogService) GetDaily() []model.JobLog {
+func (s *jobLogService) GetDaily(t time.Time) []model.JobLog {
 	return nil
 }
 
-// 获取昨天今天明天的工作日志
-func (s *jobLogService) GetThreeDays() []model.JobLog {
+// 获取昨天 今天 明天的工作日志
+func (s *jobLogService) GetThreeDays(startTime time.Time, endTime time.Time) []model.JobLog {
+	return nil
+}
+
+// 获取前一天的工作日志
+func (s *jobLogService) GetPreviousDay(t time.Time) []model.JobLog {
+
+	return nil
+}
+
+// 获取后一天的工作日志
+func (s *jobLogService) GetNextDay(t time.Time) []model.JobLog {
+
 	return nil
 }

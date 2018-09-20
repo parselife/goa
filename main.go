@@ -78,7 +78,12 @@ func main() {
 	//登录页
 	app.Get("/login", func(ctx iris.Context) {
 		if core.IsLoggedIn(sessionManager.Start(ctx)) {
-			ctx.Redirect("/")
+			url := ctx.URLParam("url")
+			if url != "" {
+				ctx.Redirect(url)
+			} else {
+				ctx.Redirect("/")
+			}
 			return
 		}
 		ctx.View("login.html")
