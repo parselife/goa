@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"goa/goa/core"
+)
 
 // 工时记录
 type JobLog struct {
@@ -10,8 +12,8 @@ type JobLog struct {
 	Type      JobType    `json:"type" xorm:"notnull"`
 	Title     string     `json:"title" xorm:"varchar(50) notnull"`
 	Content   string     `json:"content" xorm:"varchar(1000) nounull "`
-	StartTime time.Time  `json:"startTime"`
-	EndTime   time.Time  `json:"endTime"`
-	CreateAt  time.Time  `json:"createAt" xorm:"created"`
-	UpdateAt  time.Time  `json:"updateAt" xorm:"updated"`
+	StartTime core.Time  `json:"startTime"`
+	EndTime   core.Time  `json:"endTime"`
+	CreateAt  core.Time  `json:"createAt" xorm:"created"`
+	UpdateAt  core.Time  `json:"updateAt" xorm:"updated"`
 }

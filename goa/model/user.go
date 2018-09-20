@@ -3,8 +3,8 @@ package model
 import (
 	"crypto/md5"
 	"errors"
-	"time"
 	"fmt"
+	"goa/goa/core"
 )
 
 // 系统登录用户
@@ -16,8 +16,8 @@ type User struct {
 	DisplayName string    `json:"displayName"`
 	Enabled     bool      `json:"enabled" xorm:"default 1"`
 	IsAdmin     bool      `json:"isAdmin" xorm:"default 0"`
-	CreateAt    time.Time `json:"createAt" xorm:"created"`
-	UpdateAt    time.Time `json:"updateAt" xorm:"updated"`
+	CreateAt    core.Time `json:"createAt" xorm:"created"`
+	UpdateAt    core.Time `json:"updateAt" xorm:"updated"`
 }
 
 // md5 加密

@@ -84,6 +84,7 @@ func main() {
 		ctx.View("login.html")
 	})
 
+	// 登录验证
 	app.Post("/signin", func(ctx iris.Context) {
 		s := sessionManager.Start(ctx)
 		var (

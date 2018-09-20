@@ -27,6 +27,60 @@ func (c *RestController) authCheck() {
 	}
 }
 
+//---------------------工作日志-------------------
+// GET /rest/jobs
+func (c *RestController) GetJobs() interface{} {
+	c.authCheck()
+	if !core.Admin(c.Session) {
+		return mvc.Response{
+			Code: iris.StatusForbidden,
+		}
+	}
+	return c.JobLogService.GetAll()
+}
+
+// GET /rest/job/1
+func (c *RestController) GetJobBy(id int64) interface{} {
+	c.authCheck()
+	o, found := c.JobLogService.GetByID(id)
+	if !found {
+		return core.RenderFailure("未找到记录!")
+	}
+	return core.RenderJson(o)
+}
+
+//  获取当前用户的工作日志 GET /rest/job/me
+func (c *RestController) GetJobMe() interface{} {
+	c.authCheck()
+	jobs, found := c.JobLogService.GetByUserId(core.GetCurrentUserID(c.Session))
+	if !found {
+		return core.RenderFailure("未找到记录!")
+	}
+	return core.RenderJson(jobs)
+}
+
+// POST /rest/job
+func (c *RestController) PostJob() interface{} {
+	c.authCheck()
+	var joblog model.JobLog
+	if err := c.Ctx.ReadJSON(&joblog); err != nil {
+		c.Ctx.StatusCode(iris.StatusBadRequest)
+		c.Ctx.WriteString(err.Error())
+	}
+	saved, err := c.JobLogService.Save(joblog)
+	if err != nil {
+		return core.RenderFailure(err.Error())
+	}
+	return core.RenderJson(saved)
+}
+
+// DELETE /rest/job/1
+func (c *RestController) DeleteJobBy(id int64) interface{} {
+	c.authCheck()
+	ok := c.OrganService.DeleteByID(id)
+	return core.RenderJson(ok)
+}
+
 //---------------------用户-----------------------
 // 获取所有用户 GET /rest/users
 func (c *RestController) GetUsers() mvc.Response {
