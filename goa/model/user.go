@@ -10,7 +10,7 @@ import (
 // 系统登录用户
 type User struct {
 	ID          int64     `json:"id"`
-	OrganId     int64     `json:"organ, omitempty"`
+	Organ       Organ     `json:"organ"`
 	Name        string    `json:"name" xorm:" notnull unique 'name'"`
 	Password    string    `json:"password"`
 	DisplayName string    `json:"displayName"`

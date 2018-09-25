@@ -35,7 +35,7 @@ func main() {
 
 	// ---- 初始化 session ----
 	sessionManager := sessions.New(sessions.Config{
-		Cookie:       "njzykjgoa",
+		Cookie:       "zykjsessionid",
 		Expires:      12 * time.Hour,
 		AllowReclaim: true,
 	})
