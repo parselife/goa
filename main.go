@@ -1,20 +1,20 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/mvc"
 	"github.com/kataras/iris/sessions"
 	"goa/goa/core"
 	"goa/goa/datasource"
+	"goa/goa/model"
 	"goa/goa/repo"
 	"goa/goa/service"
 	"goa/goa/web"
 	"log"
-	"time"
-	"fmt"
-	"goa/goa/model"
-	"flag"
 	"strconv"
+	"time"
 )
 
 func main() {

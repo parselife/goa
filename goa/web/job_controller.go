@@ -1,10 +1,9 @@
 package web
 
-
 import (
 	"github.com/kataras/iris"
-	"goa/goa/service"
 	"github.com/kataras/iris/sessions"
+	"goa/goa/service"
 )
 
 type JobController struct {

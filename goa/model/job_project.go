@@ -7,7 +7,7 @@ import (
 type ProjectStatus int32
 
 const (
-	running   ProjectStatus = iota
+	running ProjectStatus = iota
 	paused
 	completed
 )

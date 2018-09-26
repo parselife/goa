@@ -1,9 +1,9 @@
 package service
 
 import (
+	"errors"
 	"goa/goa/model"
 	"goa/goa/repo"
-	"errors"
 )
 
 type UserService interface {

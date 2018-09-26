@@ -37,14 +37,12 @@ func (c *UserController) GetMe() interface{} {
 	user, found := c.Service.GetByID(core.GetCurrentUserID(c.Session))
 	if !found {
 		return iris.Map{
-			"succcess": false,
-			"msg":      "用户不存在",
+			"success": false,
+			"msg":     "用户不存在",
 		}
 	}
 	return user
 }
-
-
 
 // testcode
 func (c *UserController) GetText() mvc.Response {

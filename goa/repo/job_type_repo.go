@@ -1,9 +1,9 @@
 package repo
 
 import (
-	"goa/goa/model"
-	"github.com/go-xorm/xorm"
 	"fmt"
+	"github.com/go-xorm/xorm"
+	"goa/goa/model"
 )
 
 type JobTypeRepo interface {

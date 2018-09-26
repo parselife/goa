@@ -12,6 +12,7 @@ type SqlConf struct {
 	ShowSql    bool
 	LogLevel   int64
 }
+
 // 应用信息配置
 type AppInfo struct {
 	Name   string
