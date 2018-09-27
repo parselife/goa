@@ -8,7 +8,7 @@ import (
 func RenderFailure(msg string) mvc.Response {
 
 	ret := iris.Map{
-		"succcess": false,
+		"success": false,
 		"msg":      msg,
 	}
 

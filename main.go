@@ -15,6 +15,7 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"os"
 )
 
 func main() {
@@ -132,7 +133,13 @@ func main() {
 	})
 
 	port := flag.Int("p", 8080, "http listen port")
+	// 日志是否输出到file
+	enableLogFile := flag.Bool("log_file", false, "output log to file")
 	flag.Parse()
+	if *enableLogFile {
+		setLogger(app)
+	}
+	app.Logger().Info("app is ready")
 	app.Run(iris.Addr(":"+strconv.Itoa(*port)), iris.WithConfiguration(c))
 }
 
@@ -148,15 +155,19 @@ func securityMiddleware(ctx iris.Context) {
 func newApp() *iris.Application {
 	app := iris.New()
 	// 设置日志
-	app.Logger().Prefix = []byte("[goa]")
+	//app.Logger().Prefix = []byte("[goa]")
 	app.Logger().SetLevel("info")
 	// 注册视图
 	app.RegisterView(iris.HTML("./public", ".html").Reload(true))
 	app.StaticWeb("/", "./public")
 	//assetHandler := app.StaticHandler("./public", false, false)
 	//app.SPA(assetHandler)
-	app.Logger().Info("app is ready")
 	return app
+}
+
+func setLogger(app *iris.Application) {
+	f := newLogFile()
+	app.Logger().AddOutput(f)
 }
 
 // 解析应用配置
@@ -173,4 +184,19 @@ func parseConfig(conf map[string]interface{}) core.AppConf {
 		sqlConfMap["ShowSql"].(bool), sqlConfMap["LogLevel"].(int64)}, core.AppInfo{infoConfMap["Name"].(string),
 		infoConfMap["Desc"].(string), infoConfMap["Author"].(string)}}
 
+}
+
+func todayFilename() string {
+	today := time.Now().Format("2006-01-02")
+	return today + ".log"
+}
+
+func newLogFile() *os.File {
+	filename := todayFilename()
+	// open an output file, this will append to the today's file if server restarted.
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	return f
 }

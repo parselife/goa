@@ -44,6 +44,17 @@ func (c *UserController) GetMe() interface{} {
 	return user
 }
 
+// 修改用户密码 GET /user/alter
+func (c *UserController) GetAlter() interface{} {
+	oldPwd := c.Ctx.URLParam("oldPwd")
+	newPwd := c.Ctx.URLParam("newPwd")
+	user, err := c.Service.UpdatePassword(core.GetCurrentUserID(c.Session), oldPwd, newPwd)
+	if err != nil {
+		return core.RenderFailure(err.Error())
+	}
+	return core.RenderJson(user)
+}
+
 // testcode
 func (c *UserController) GetText() mvc.Response {
 	if ok, _ := c.Session.GetBoolean(core.AUTHENTICATED); !ok {
