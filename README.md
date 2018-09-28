@@ -10,6 +10,7 @@ $ go get -u https://github.com/Yxf005/goa
 ````
 
 2. 配置数据库连接
+
 打开 `/etc/app.tml`, 定位到
 
 ````toml
@@ -21,6 +22,7 @@ $ go get -u https://github.com/Yxf005/goa
 ````
 
 3. go build & run
+ 
  可选参数:
 - `-p 8000` 可改变端口
 - `-log2file` 将系统日志写入文件
