@@ -77,7 +77,15 @@ func (c *RestController) PostJob() interface{} {
 // DELETE /rest/job/1
 func (c *RestController) DeleteJobBy(id int64) interface{} {
 	c.authCheck()
-	ok := c.OrganService.DeleteByID(id)
+	jl, found := c.JobLogService.GetByID(id)
+	if !found {
+		core.RenderFailure("记录不存在!")
+	}
+	if core.GetCurrentUserID(c.Session) != jl.User.ID  {
+		// 进行用户验证 以避免被非本人删除记录
+		core.RenderFailure("没有操作权限!")
+	}
+	ok := c.JobLogService.DeleteByID(id)
 	return core.RenderJson(ok)
 }
 

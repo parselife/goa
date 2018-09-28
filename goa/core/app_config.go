@@ -18,4 +18,5 @@ type AppInfo struct {
 	Name   string
 	Desc   string
 	Author string
+	Version string
 }

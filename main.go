@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"time"
 	"os"
+	"io"
 )
 
 func main() {
@@ -130,16 +131,21 @@ func main() {
 	// 应用描述信息
 	app.Get("/info", func(ctx iris.Context) {
 		ctx.JSON(appConf.AppInfo)
+
+	})
+
+	app.Get("/endpoints", func(ctx iris.Context) {
+		ctx.JSON(app.GetRoutes())
 	})
 
 	port := flag.Int("p", 8080, "http listen port")
 	// 日志是否输出到file
-	enableLogFile := flag.Bool("log_file", false, "output log to file")
+	enableLogFile := flag.Bool("log2file", false, "output log to file")
 	flag.Parse()
 	if *enableLogFile {
 		setLogger(app)
 	}
-	app.Logger().Info("app is ready")
+	app.Logger().Info("app is ready\n")
 	app.Run(iris.Addr(":"+strconv.Itoa(*port)), iris.WithConfiguration(c))
 }
 
@@ -165,9 +171,11 @@ func newApp() *iris.Application {
 	return app
 }
 
+// 设置日志输出方式
 func setLogger(app *iris.Application) {
 	f := newLogFile()
-	app.Logger().AddOutput(f)
+	// 日志输出到控制台和文件中
+	app.Logger().SetOutput(io.MultiWriter(f, os.Stdout))
 }
 
 // 解析应用配置
@@ -182,7 +190,7 @@ func parseConfig(conf map[string]interface{}) core.AppConf {
 	}
 	return core.AppConf{core.SqlConf{sqlConfMap["DriverName"].(string), sqlConfMap["DbUrl"].(string),
 		sqlConfMap["ShowSql"].(bool), sqlConfMap["LogLevel"].(int64)}, core.AppInfo{infoConfMap["Name"].(string),
-		infoConfMap["Desc"].(string), infoConfMap["Author"].(string)}}
+		infoConfMap["Desc"].(string), infoConfMap["Author"].(string), infoConfMap["Version"].(string)}}
 
 }
 
@@ -193,7 +201,6 @@ func todayFilename() string {
 
 func newLogFile() *os.File {
 	filename := todayFilename()
-	// open an output file, this will append to the today's file if server restarted.
 	f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)

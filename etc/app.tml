@@ -10,6 +10,7 @@ Charset = "UTF-8"
     Name = "GOA"
     Desc = "A simple job log app built with Golang."
     Author = "Alex"
+    Version = "v0.1"
 [Other.sqlConf]
     DriverName = "mysql"
     DbUrl = "root:qwer1234@tcp(127.0.0.1:3306)/goa_dev?charset=utf8"
