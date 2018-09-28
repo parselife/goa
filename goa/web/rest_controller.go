@@ -67,6 +67,10 @@ func (c *RestController) PostJob() interface{} {
 		c.Ctx.StatusCode(iris.StatusBadRequest)
 		c.Ctx.WriteString(err.Error())
 	}
+	if joblog.User.ID == 0 {
+		// 关联当前用户
+		joblog.User.ID = core.GetCurrentUserID(c.Session)
+	}
 	saved, err := c.JobLogService.Save(joblog)
 	if err != nil {
 		return core.RenderFailure(err.Error())
@@ -81,7 +85,7 @@ func (c *RestController) DeleteJobBy(id int64) interface{} {
 	if !found {
 		core.RenderFailure("记录不存在!")
 	}
-	if core.GetCurrentUserID(c.Session) != jl.User.ID  {
+	if core.GetCurrentUserID(c.Session) != jl.User.ID {
 		// 进行用户验证 以避免被非本人删除记录
 		core.RenderFailure("没有操作权限!")
 	}
