@@ -1,6 +1,8 @@
 # goa
 > 使用 `golang` 开发， 符合 `mvc` 架构的工时记录应用.
 
+前端展示页面使用 `vuejs` 框架，项目地址: [goa-web](https://github.com/Yxf005/goa-web)
+
 ## 安装
 `golang` 开发环境，推荐 **1.10+**
 1. 获取源码
