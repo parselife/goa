@@ -26,6 +26,20 @@ func (c *RestController) authCheck() {
 		c.Ctx.Redirect("/login?url=" + c.Ctx.Request().Host + c.Ctx.Request().RequestURI)
 	}
 }
+//---------------------工作汇报-------------------
+// GET /rest/weeklyReports
+func (c *RestController) GetWeeklyReports() interface{} {
+
+	return nil
+}
+
+// GET /rest/monthlyReports
+func (c *RestController) GetWeeklyReports() interface{} {
+
+	return nil
+}
+
+
 
 //---------------------工作日志-------------------
 // GET /rest/jobs

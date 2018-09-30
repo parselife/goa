@@ -13,6 +13,7 @@ type JobLog struct {
 	Type      JobType    `json:"type" xorm:"not null"`
 	Title     string     `json:"title" xorm:"varchar(50) not null"`
 	Content   string     `json:"content" xorm:"varchar(1000) not null "`
+	Progress  float64    `json:"progress"`
 	StartTime time.Time  `json:"startTime" xorm:"not null"`
 	EndTime   time.Time  `json:"endTime" xorm:"not null"`
 	CreateAt  core.Time  `json:"createAt" xorm:"created"`
