@@ -34,7 +34,7 @@ func (c *RestController) GetWeeklyReports() interface{} {
 }
 
 // GET /rest/monthlyReports
-func (c *RestController) GetWeeklyReports() interface{} {
+func (c *RestController) GetMonthlyReports() interface{} {
 
 	return nil
 }
@@ -267,7 +267,19 @@ func (c *RestController) DeleteTypeBy(id int64) interface{} {
 // GET /rest/organs
 func (c *RestController) GetOrgans() interface{} {
 	c.authCheck()
-	return c.OrganService.GetAll()
+	organs :=c.OrganService.GetAll()
+	maps := make([]iris.Map, len(organs))
+	for i, organ := range organs {
+		user, _ := c.UserService.GetByID(organ.Manager)
+		 maps[i] = iris.Map{
+		 	"id": organ.ID,
+		 	"name": organ.Name,
+		 	"desc": organ.Description,
+		 	"manager": organ.Manager,
+		 	"head": user.DisplayName,
+		 }
+	}
+	return maps
 }
 
 // GET /rest/organ/1
