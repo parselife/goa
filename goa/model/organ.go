@@ -6,8 +6,9 @@ import "goa/goa/core"
 type Organ struct {
 	ID          int64     `json:"id"`
 	Name        string    `json:"name" xorm:"varchar(50) notnull unique"`
+	Parent      int64     `json:"parent"` // 父级别部门id
 	Description string    `json:"desc,omitempty"`
-	Manager     int64      `json:"manager" xorm:"notnull"` //部门主管id
+	Manager     int64     `json:"manager" xorm:"notnull"` //部门主管id
 	CreateAt    core.Time `json:"createAt" xorm:"created"`
 	UpdateAt    core.Time `json:"updateAt" xorm:"updated"`
 }

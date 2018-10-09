@@ -2,7 +2,7 @@ package model
 
 import "goa/goa/core"
 
-// 消息内容类型 可以是 普通文本/markdown 文本/html
+// 消息内容类型 可以是 普通文本/markdown
 type MessageType int32
 
 const (

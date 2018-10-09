@@ -26,20 +26,6 @@ func (c *RestController) authCheck() {
 		c.Ctx.Redirect("/login?url=" + c.Ctx.Request().Host + c.Ctx.Request().RequestURI)
 	}
 }
-//---------------------工作汇报-------------------
-// GET /rest/weeklyReports
-func (c *RestController) GetWeeklyReports() interface{} {
-
-	return nil
-}
-
-// GET /rest/monthlyReports
-func (c *RestController) GetMonthlyReports() interface{} {
-
-	return nil
-}
-
-
 
 //---------------------工作日志-------------------
 // GET /rest/jobs
@@ -267,17 +253,20 @@ func (c *RestController) DeleteTypeBy(id int64) interface{} {
 // GET /rest/organs
 func (c *RestController) GetOrgans() interface{} {
 	c.authCheck()
-	organs :=c.OrganService.GetAll()
+	organs := c.OrganService.GetAll()
 	maps := make([]iris.Map, len(organs))
 	for i, organ := range organs {
 		user, _ := c.UserService.GetByID(organ.Manager)
-		 maps[i] = iris.Map{
-		 	"id": organ.ID,
-		 	"name": organ.Name,
-		 	"desc": organ.Description,
-		 	"manager": organ.Manager,
-		 	"head": user.DisplayName,
-		 }
+		parentOrgan, _ := c.OrganService.GetByID(organ.Parent)
+		maps[i] = iris.Map{
+			"id":      organ.ID,
+			"name":    organ.Name,
+			"desc":    organ.Description,
+			"manager": organ.Manager,
+			"head":    user.DisplayName,
+			"parent":  parentOrgan,
+		}
+
 	}
 	return maps
 }

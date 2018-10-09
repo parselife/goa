@@ -22,7 +22,7 @@ func Init(conf *core.SqlConf) (*xorm.Engine, error) {
 
 	// 同步表结构
 	err = engine.Sync2(new(model.User), new(model.JobLog), new(model.JobProject),
-		new(model.JobType), new(model.Organ))
+		new(model.JobType), new(model.Organ), new(model.Message), new(model.MessageBody))
 	if err != nil {
 		return nil, err
 	}

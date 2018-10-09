@@ -15,7 +15,7 @@ type Message struct {
 	ID       int64         `json:"id"`
 	Sender   User          `json:"sender"`   // 发信人
 	Receiver User          `json:"receiver"` // 收信人
-	Status   MessageStatus `json:"status" xorm:"not null (default 0)"`   //当前状态
+	Status   MessageStatus `json:"status" xorm:"not null default 0"`   //当前状态
 	MessageBody MessageBody `json:"messageBody" xorm:"not null"`
 	CreateAt core.Time     `json:"createAt" xorm:"created"`
 	UpdateAt core.Time     `json:"updateAt" xorm:"updated"`

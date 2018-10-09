@@ -57,8 +57,8 @@ func main() {
 		sessionManager.Start,
 	).Handle(new(web.UserController))
 
-	admin := mvc.New(app.Party("/rest"))
-	admin.Register(
+	rest := mvc.New(app.Party("/rest"))
+	rest.Register(
 		userService,
 		jobLogService,
 		proService,
@@ -66,6 +66,8 @@ func main() {
 		typeService,
 		sessionManager.Start,
 	).Handle(new(web.RestController))
+
+	rest.Party("/msg").Register(service.New,sessionManager.Start).Handle(new(web.MessageController))
 
 	// 首页
 	app.Get("/", func(ctx iris.Context) {
