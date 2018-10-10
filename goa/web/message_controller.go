@@ -21,8 +21,4 @@ func (c *MessageController) GetAll() interface{} {
 }
 
 //
-//// GET /rest/monthlyReports
-//func (c *RestController) GetMonthly() interface{} {
-//
-//	return nil
-//}
+

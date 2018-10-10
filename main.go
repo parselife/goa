@@ -67,7 +67,13 @@ func main() {
 		sessionManager.Start,
 	).Handle(new(web.RestController))
 
-	rest.Party("/msg").Register(service.New,sessionManager.Start).Handle(new(web.MessageController))
+	// endpoint: /rest/msg
+	rest.Party("/msg").Register(service.NewMsgService(repo.NewMsgRepo(db), repo.NewMsgBodyRepo(db)),
+		sessionManager.Start).Handle(new(web.MessageController))
+
+	// endpoint: /rest/report
+	rest.Party("/report").Register(service.NewReportService(repo.NewWeeklyReportRepo(db), repo.NewMonthlyReportRepo(db)),
+		sessionManager.Start).Handle(new(web.ReportController))
 
 	// 首页
 	app.Get("/", func(ctx iris.Context) {
@@ -133,7 +139,6 @@ func main() {
 	// 应用描述信息
 	app.Get("/info", func(ctx iris.Context) {
 		ctx.JSON(appConf.AppInfo)
-
 	})
 
 	app.Get("/endpoints", func(ctx iris.Context) {
