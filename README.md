@@ -8,7 +8,7 @@
 1. 获取源码
 
 ````shell
-$ go get -u https://github.com/Yxf005/goa
+$ go get -u https://github.com/parselife/goa
 ````
 
 2. 配置数据库连接
